@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+  <changeSet id="create_activation_key_table" author="graynaud">
+    <createTable tableName="activation_key">
+      <column name="id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false" unique="true"/>
+      </column>
+
+      <column name="user_id" type="bigint">
+        <constraints nullable="false" foreignKeyName="fk_activation_key_app_user_id" references="app_user(id)"
+                     unique="true"/>
+      </column>
+
+      <column name="activation_key" type="varchar(30)">
+        <constraints nullable="false" unique="true"/>
+      </column>
+
+      <column name="activation_date" type="timestamp"/>
+
+      <column name="creation_date" type="timestamp">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="creation_user" type="varchar(25)">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="modification_date" type="timestamp">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="modification_user" type="varchar(25)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <createIndex indexName="idx_activation_key_activation_key" tableName="activation_key">
+      <column name="activation_key"/>
+    </createIndex>
+  </changeSet>
+</databaseChangeLog>

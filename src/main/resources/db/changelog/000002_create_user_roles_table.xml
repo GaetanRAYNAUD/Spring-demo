@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+  <changeSet id="create_user_roles_table" author="graynaud">
+    <createTable tableName="user_roles">
+      <column name="role" type="varchar(24)">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="user_id" type="bigint">
+        <constraints nullable="false" foreignKeyName="fk_user_roles_app_user_id" references="app_user(id)"/>
+      </column>
+    </createTable>
+
+    <createIndex indexName="idx_user_roles_user_id" tableName="user_roles">
+      <column name="user_id"/>
+    </createIndex>
+
+    <addUniqueConstraint tableName="user_roles" columnNames="role, user_id"/>
+  </changeSet>
+</databaseChangeLog>
