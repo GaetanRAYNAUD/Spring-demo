@@ -25,6 +25,9 @@ public class DemoProperties {
     @NestedConfigurationProperty
     private SecurityJwtProperties securityJwt;
 
+    @NestedConfigurationProperty
+    private RecaptchaProperties recaptcha;
+
     public String getTitle() {
         return title;
     }
@@ -79,5 +82,13 @@ public class DemoProperties {
 
     public void setSecurityJwt(SecurityJwtProperties securityJwt) {
         this.securityJwt = securityJwt;
+    }
+
+    public RecaptchaProperties getRecaptcha() {
+        return recaptcha;
+    }
+
+    public void setRecaptcha(RecaptchaProperties recaptcha) {
+        this.recaptcha = recaptcha;
     }
 }

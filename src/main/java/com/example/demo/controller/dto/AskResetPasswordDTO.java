@@ -2,20 +2,10 @@ package com.example.demo.controller.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(name = "ResendActivation")
-public class ResendActivationDTO extends EmailDTO {
-
-    private String key;
+@Schema(name = "AskResetPassword")
+public class AskResetPasswordDTO extends EmailDTO {
 
     private String token;
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
-    }
 
     public String getToken() {
         return token;

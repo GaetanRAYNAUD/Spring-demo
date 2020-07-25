@@ -2,7 +2,7 @@ package com.example.demo.controller.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(name = "ChangePassword")
+@Schema(name = "ResetPassword")
 public class ResetPasswordDTO {
 
     private String key;
@@ -10,6 +10,8 @@ public class ResetPasswordDTO {
     private String password;
 
     private String passwordConfirmation;
+
+    private String token;
 
     public String getKey() {
         return key;
@@ -33,5 +35,13 @@ public class ResetPasswordDTO {
 
     public void setPasswordConfirmation(String passwordConfirmation) {
         this.passwordConfirmation = passwordConfirmation;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

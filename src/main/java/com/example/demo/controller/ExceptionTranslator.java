@@ -6,6 +6,7 @@ import com.example.demo.common.exception.KeyExpiredException;
 import com.example.demo.common.exception.KeyNotFoundException;
 import com.example.demo.common.exception.PasswordsNotMatchException;
 import com.example.demo.common.exception.PasswordsNotMatchRegexException;
+import com.example.demo.common.exception.RecaptchaV3Exception;
 import com.example.demo.common.exception.ResetPasswordException;
 import com.example.demo.common.exception.UserAlreadyExistException;
 import com.example.demo.common.exception.UsernameTooLongException;
@@ -169,5 +170,12 @@ public class ExceptionTranslator {
         }
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorObject<Void>> handleRecaptchaV3Exception(RecaptchaV3Exception e) {
+        LOGGER.error("[RECAPTCHA] - " + e.getMessage(), e);
+
+        return new ResponseEntity<>(new ErrorObject<>(ErrorCode.INVALID_CREDENTIALS), HttpStatus.UNAUTHORIZED);
     }
 }

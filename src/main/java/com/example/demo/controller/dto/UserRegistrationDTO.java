@@ -13,6 +13,8 @@ public class UserRegistrationDTO {
 
     private String passwordConfirmation;
 
+    private String token;
+
     public String getUsername() {
         return username;
     }
@@ -43,5 +45,13 @@ public class UserRegistrationDTO {
 
     public void setPasswordConfirmation(String passwordConfirmation) {
         this.passwordConfirmation = passwordConfirmation;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }
