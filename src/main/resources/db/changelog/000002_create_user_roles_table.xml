@@ -5,7 +5,7 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
   <changeSet id="create_user_roles_table" author="graynaud">
-    <createTable tableName="user_roles">
+    <createTable tableName="user_roles" schemaName="demo">
       <column name="role" type="varchar(24)">
         <constraints nullable="false"/>
       </column>
@@ -15,10 +15,10 @@
       </column>
     </createTable>
 
-    <createIndex indexName="idx_user_roles_user_id" tableName="user_roles">
+    <createIndex indexName="idx_user_roles_user_id" tableName="user_roles" schemaName="demo">
       <column name="user_id"/>
     </createIndex>
 
-    <addUniqueConstraint tableName="user_roles" columnNames="role, user_id"/>
+    <addUniqueConstraint tableName="user_roles" columnNames="role, user_id" schemaName="demo"/>
   </changeSet>
 </databaseChangeLog>

@@ -1,15 +1,12 @@
 package com.example.demo.config.filter;
 
 import com.example.demo.common.Constants;
-import com.example.demo.common.exception.RecaptchaV3Exception;
 import com.example.demo.controller.dto.TokenDTO;
 import com.example.demo.controller.object.ErrorCode;
 import com.example.demo.controller.object.ErrorObject;
 import com.example.demo.model.User;
 import com.example.demo.service.JwtService;
 import com.example.demo.service.definition.ResetKeyService;
-import com.example.demo.service.google.RecaptchaV3Action;
-import com.example.demo.service.google.RecaptchaV3Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.http.HttpHeaders;
@@ -31,30 +28,22 @@ import java.util.Date;
 
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
-    public static final String FORM_RECAPTCHA_KEY = "token";
-
     private final JwtService jwtService;
 
     private final ObjectMapper objectMapper;
 
     private final ResetKeyService resetKeyService;
 
-    private final RecaptchaV3Service recaptchaV3Service;
-
-    public AuthenticationFilter(AuthenticationManager authenticationManager, JwtService jwtService, ObjectMapper objectMapper, ResetKeyService resetKeyService,
-                                RecaptchaV3Service recaptchaV3Service) {
+    public AuthenticationFilter(AuthenticationManager authenticationManager, JwtService jwtService, ObjectMapper objectMapper, ResetKeyService resetKeyService) {
         this.jwtService = jwtService;
         this.objectMapper = objectMapper;
         this.resetKeyService = resetKeyService;
-        this.recaptchaV3Service = recaptchaV3Service;
         setAuthenticationManager(authenticationManager);
     }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         try {
-            this.recaptchaV3Service.validateToken(request.getParameter(FORM_RECAPTCHA_KEY), request.getParameter(SPRING_SECURITY_FORM_USERNAME_KEY),
-                                                  RecaptchaV3Action.LOGIN);
             return super.attemptAuthentication(request, response);
         } catch (AccountStatusException e) {
             SecurityContextHolder.clearContext();
@@ -70,7 +59,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             }
 
             return null;
-        } catch (BadCredentialsException | RecaptchaV3Exception e) {
+        } catch (BadCredentialsException e) {
             SecurityContextHolder.clearContext();
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);

@@ -5,7 +5,7 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
   <changeSet id="create_activation_key_table" author="graynaud">
-    <createTable tableName="activation_key">
+    <createTable tableName="activation_key" schemaName="demo">
       <column name="id" type="bigint" autoIncrement="true">
         <constraints primaryKey="true" nullable="false" unique="true"/>
       </column>
@@ -38,7 +38,7 @@
       </column>
     </createTable>
 
-    <createIndex indexName="idx_activation_key_activation_key" tableName="activation_key">
+    <createIndex indexName="idx_activation_key_activation_key" tableName="activation_key" schemaName="demo">
       <column name="activation_key"/>
     </createIndex>
   </changeSet>

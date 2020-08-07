@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <databaseChangeLog
-    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
   <changeSet id="create_reset_key_table" author="graynaud">
-    <createTable tableName="reset_key">
+    <createTable tableName="reset_key" schemaName="demo">
       <column name="id" type="bigint" autoIncrement="true">
         <constraints primaryKey="true" nullable="false" unique="true"/>
       </column>
@@ -38,7 +38,7 @@
       </column>
     </createTable>
 
-    <createIndex indexName="idx_reset_key_reset_key" tableName="reset_key">
+    <createIndex indexName="idx_reset_key_reset_key" tableName="reset_key" schemaName="demo">
       <column name="reset_key"/>
     </createIndex>
   </changeSet>
