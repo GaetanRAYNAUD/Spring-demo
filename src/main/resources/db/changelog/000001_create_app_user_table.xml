@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+  <changeSet id="create_app_user_table" author="graynaud">
+    <createTable tableName="app_user" schemaName="demo">
+      <column name="id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false" unique="true"/>
+      </column>
+
+      <column name="username" type="varchar(24)">
+        <constraints nullable="false" unique="true"/>
+      </column>
+
+      <column name="email" type="varchar(255)">
+        <constraints nullable="false" unique="true"/>
+      </column>
+
+      <column name="password_hash" type="varchar(60)"/>
+
+      <column name="enabled" type="boolean" defaultValueBoolean="false"/>
+
+      <column name="password_reset_date" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="creation_date" type="timestamp">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="creation_user" type="varchar(25)">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="modification_date" type="timestamp">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="modification_user" type="varchar(25)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <createIndex indexName="idx_user_username" tableName="app_user" schemaName="demo">
+      <column name="username"/>
+    </createIndex>
+
+    <createIndex indexName="idx_user_email" tableName="app_user" schemaName="demo">
+      <column name="email"/>
+    </createIndex>
+  </changeSet>
+</databaseChangeLog>

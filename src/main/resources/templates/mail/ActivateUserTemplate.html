@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div th:text="#{activate_user.greeting}"></div>
+<br>
+<div>
+    <span th:text="#{activate_user.text}"></span>
+    <a th:text="#{activate_user.action_link}" th:href="${link}"></a>
+</div>
+<br>
+<div th:text="#{activate_user.bye}"></div>
+</body>
+</html>
