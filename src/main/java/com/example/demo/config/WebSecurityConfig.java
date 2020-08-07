@@ -5,6 +5,7 @@ import com.example.demo.config.filter.AuthorizationFilter;
 import com.example.demo.config.properties.DemoProperties;
 import com.example.demo.service.JwtService;
 import com.example.demo.service.definition.ResetKeyService;
+import com.example.demo.service.google.RecaptchaV3Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,20 +39,23 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final DemoProperties demoProperties;
 
+    private final RecaptchaV3Service recaptchaV3Service;
+
     public WebSecurityConfig(JwtService jwtService, ObjectMapper objectMapper, UserDetailsService userService, ResetKeyService resetKeyService,
-                             DemoProperties demoProperties) {
+                             DemoProperties demoProperties, RecaptchaV3Service recaptchaV3Service) {
         this.jwtService = jwtService;
         this.objectMapper = objectMapper;
         this.userService = userService;
         this.resetKeyService = resetKeyService;
         this.demoProperties = demoProperties;
+        this.recaptchaV3Service = recaptchaV3Service;
         SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        AuthenticationFilter authenticationFilter = new AuthenticationFilter(authenticationManager(), this.jwtService,
-                                                                             this.objectMapper, this.resetKeyService);
+        AuthenticationFilter authenticationFilter = new AuthenticationFilter(authenticationManager(), this.jwtService, this.objectMapper, this.resetKeyService,
+                                                                             this.recaptchaV3Service);
         authenticationFilter.setFilterProcessesUrl("/public/authentication/login");
 
         http.csrf().disable();

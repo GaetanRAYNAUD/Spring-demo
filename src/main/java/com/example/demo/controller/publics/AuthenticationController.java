@@ -1,6 +1,6 @@
 package com.example.demo.controller.publics;
 
-import com.example.demo.controller.dto.EmailDTO;
+import com.example.demo.controller.dto.AskResetPasswordDTO;
 import com.example.demo.controller.dto.ResendActivationDTO;
 import com.example.demo.controller.dto.ResetPasswordDTO;
 import com.example.demo.controller.dto.UserActivationDTO;
@@ -55,7 +55,7 @@ public class AuthenticationController {
     })
     public ResponseEntity<Void> register(@RequestBody UserRegistrationDTO registration) throws MessagingException {
         this.userService.register(registration.getUsername(), registration.getEmail(), registration.getPassword(),
-                                  registration.getPasswordConfirmation());
+                                  registration.getPasswordConfirmation(), registration.getToken());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -75,7 +75,7 @@ public class AuthenticationController {
                          content = {@Content(schema = @Schema(implementation = ErrorObject.class))})
     })
     public ResponseEntity<Void> activate(@RequestBody UserActivationDTO activation) {
-        this.userService.activate(activation.getKey());
+        this.userService.activate(activation.getKey(), activation.getToken());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -91,7 +91,7 @@ public class AuthenticationController {
                          content = {@Content(schema = @Schema(implementation = ErrorObject.class))})
     })
     public ResponseEntity<Void> resendActivation(@RequestBody ResendActivationDTO resendActivation) throws MessagingException {
-        this.userService.sendActivationMail(resendActivation.getEmail(), resendActivation.getKey());
+        this.userService.sendActivationMail(resendActivation.getEmail(), resendActivation.getKey(), resendActivation.getToken());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -104,8 +104,8 @@ public class AuthenticationController {
                          description = "Internal error",
                          content = {@Content(schema = @Schema(implementation = ErrorObject.class))})
     })
-    public ResponseEntity<Void> askResetPassword(@RequestBody EmailDTO email) throws MessagingException {
-        this.userService.resetPassword(email.getEmail());
+    public ResponseEntity<Void> askResetPassword(@RequestBody AskResetPasswordDTO resetPassword) throws MessagingException {
+        this.userService.askResetPassword(resetPassword.getEmail(), resetPassword.getToken());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -129,7 +129,8 @@ public class AuthenticationController {
     public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordDTO resetPassword) {
         this.userService.resetPassword(resetPassword.getKey(),
                                        resetPassword.getPassword(),
-                                       resetPassword.getPasswordConfirmation());
+                                       resetPassword.getPasswordConfirmation(),
+                                       resetPassword.getToken());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

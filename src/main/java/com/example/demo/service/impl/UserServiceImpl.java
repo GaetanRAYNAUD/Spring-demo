@@ -20,6 +20,8 @@ import com.example.demo.service.MailService;
 import com.example.demo.service.definition.ActivationKeyService;
 import com.example.demo.service.definition.ResetKeyService;
 import com.example.demo.service.definition.UserService;
+import com.example.demo.service.google.RecaptchaV3Action;
+import com.example.demo.service.google.RecaptchaV3Service;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.context.annotation.Lazy;
@@ -52,19 +54,22 @@ public class UserServiceImpl extends AbstractEntityServiceImpl<User, UserReposit
 
     private final MailService mailService;
 
-    public UserServiceImpl(UserRepository repository, DemoProperties demoProperties,
-                           @Lazy PasswordEncoder passwordEncoder, ActivationKeyService activationKeyService,
-                           ResetKeyService resetKeyService, MailService mailService) {
+    private final RecaptchaV3Service recaptchaV3Service;
+
+    public UserServiceImpl(UserRepository repository, DemoProperties demoProperties, @Lazy PasswordEncoder passwordEncoder,
+                           ActivationKeyService activationKeyService, ResetKeyService resetKeyService, MailService mailService,
+                           RecaptchaV3Service recaptchaV3Service) {
         super(repository);
         this.demoProperties = demoProperties;
         this.passwordEncoder = passwordEncoder;
         this.activationKeyService = activationKeyService;
         this.resetKeyService = resetKeyService;
         this.mailService = mailService;
+        this.recaptchaV3Service = recaptchaV3Service;
     }
 
     @Override
-    public User register(String username, String email, String password, String passwordConfirmation) throws MessagingException {
+    public User register(String username, String email, String password, String passwordConfirmation, String token) throws MessagingException {
         if (username.length() < 8) {
             throw new UsernameTooShortException();
         }
@@ -84,6 +89,8 @@ public class UserServiceImpl extends AbstractEntityServiceImpl<User, UserReposit
         if (!email.matches(EMAIL_REGEX)) {
             throw new EmailNotMatchRegexException("Email " + email + " doesn't match regex");
         }
+
+        this.recaptchaV3Service.validateToken(token, email, RecaptchaV3Action.REGISTRATION);
 
         User user = getByEmail(email);
 
@@ -109,7 +116,9 @@ public class UserServiceImpl extends AbstractEntityServiceImpl<User, UserReposit
     }
 
     @Override
-    public void sendActivationMail(String email, String key) throws MessagingException {
+    public void sendActivationMail(String email, String key, String token) throws MessagingException {
+        this.recaptchaV3Service.validateToken(token, email, RecaptchaV3Action.RESEND_ACTIVATION);
+
         User user;
 
         if (StringUtils.isNotBlank(email)) {
@@ -137,19 +146,17 @@ public class UserServiceImpl extends AbstractEntityServiceImpl<User, UserReposit
     }
 
     @Override
-    public void activate(String key) {
+    public void activate(String key, String token) {
+        this.recaptchaV3Service.validateToken(token, key, RecaptchaV3Action.ACTIVATE);
+
         ActivationKey activationKey = this.activationKeyService.getByActivationKey(key);
 
         if (activationKey == null) {
-            throw new KeyNotFoundException("Someone tried to activate a user with the key: "
-                                           + key + " witch does not exists !");
+            throw new KeyNotFoundException("Someone tried to activate a user with the key: " + key + " witch does not exists !");
         }
 
-        if (activationKey.getActivationDate()
-                         .before(DateUtils.addSeconds(new Date(), -this.demoProperties.getSecurityJwt()
-                                                                                      .getActivationExpiration()))) {
-            throw new KeyExpiredException(
-                    "Someone tried to activate a user with the key: " + key + " witch expired !");
+        if (activationKey.getActivationDate().before(DateUtils.addSeconds(new Date(), -this.demoProperties.getSecurityJwt().getActivationExpiration()))) {
+            throw new KeyExpiredException("Someone tried to activate a user with the key: " + key + " witch expired !");
         }
 
         User user = activationKey.getUser();
@@ -160,11 +167,12 @@ public class UserServiceImpl extends AbstractEntityServiceImpl<User, UserReposit
     }
 
     @Override
-    public void resetPassword(String email) throws MessagingException {
+    public void askResetPassword(String email, String token) throws MessagingException {
         if (!email.matches(EMAIL_REGEX)) {
-            throw new ResetPasswordException("Someone ask to reset the password for an email "
-                                             + email + " that doesn't match regex");
+            throw new ResetPasswordException("Someone ask to reset the password for an email " + email + " that doesn't match regex");
         }
+
+        this.recaptchaV3Service.validateToken(token, email, RecaptchaV3Action.ASK_RESET_PASSWORD);
 
         User user = getByEmail(email);
 
@@ -177,7 +185,7 @@ public class UserServiceImpl extends AbstractEntityServiceImpl<User, UserReposit
     }
 
     @Override
-    public void resetPassword(String key, String password, String passwordConfirmation) {
+    public void resetPassword(String key, String password, String passwordConfirmation, String token) {
         if (!password.equals(passwordConfirmation)) {
             throw new PasswordsNotMatchException();
         }
@@ -185,6 +193,8 @@ public class UserServiceImpl extends AbstractEntityServiceImpl<User, UserReposit
         if (!password.matches(PASSWORD_REGEX)) {
             throw new PasswordsNotMatchRegexException();
         }
+
+        this.recaptchaV3Service.validateToken(token, key, RecaptchaV3Action.RESET_PASSWORD);
 
         ResetKey resetKey = this.resetKeyService.getByResetKey(key);
 

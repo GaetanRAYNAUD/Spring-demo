@@ -6,19 +6,19 @@ import javax.mail.MessagingException;
 
 public interface UserService extends AbstractEntityService<User> {
 
-    User register(String username, String email, String password, String passwordConfirmation) throws MessagingException;
+    User register(String username, String email, String password, String passwordConfirmation, String token) throws MessagingException;
 
-    void sendActivationMail(String email, String key) throws MessagingException;
+    void sendActivationMail(String email, String key, String token) throws MessagingException;
 
     void sendActivationMail(User user) throws MessagingException;
 
-    void activate(String key);
+    void activate(String key, String token);
 
-    void resetPassword(String key, String password, String passwordConfirmation);
+    void resetPassword(String key, String password, String passwordConfirmation, String token);
 
     User getByEmail(String email);
 
     User getByUsername(String username);
 
-    void resetPassword(String email) throws MessagingException;
+    void askResetPassword(String email, String token) throws MessagingException;
 }
