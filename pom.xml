@@ -21,6 +21,7 @@
 		<springdoc-openapi.version>1.4.3</springdoc-openapi.version>
 		<jjwt.version>0.11.2</jjwt.version>
 		<guava.version>29.0-jre</guava.version>
+		<jwks-rsa.version>0.12.0</jwks-rsa.version>
 	</properties>
 
 	<dependencies>
@@ -122,6 +123,11 @@
 			<artifactId>guava</artifactId>
 			<version>${guava.version}</version>
 			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.auth0</groupId>
+			<artifactId>jwks-rsa</artifactId>
+			<version>${jwks-rsa.version}</version>
 		</dependency>
 	</dependencies>
 

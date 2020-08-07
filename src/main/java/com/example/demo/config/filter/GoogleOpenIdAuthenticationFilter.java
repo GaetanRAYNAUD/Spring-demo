@@ -1,6 +1,8 @@
 package com.example.demo.config.filter;
 
 import com.example.demo.common.Constants;
+import com.example.demo.common.exception.NoGoogleAccountException;
+import com.example.demo.common.exception.NotGoogleAccountException;
 import com.example.demo.common.exception.RecaptchaV3Exception;
 import com.example.demo.controller.dto.TokenDTO;
 import com.example.demo.controller.object.ErrorCode;
@@ -20,7 +22,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -29,7 +32,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Date;
 
-public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+public class GoogleOpenIdAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
+
+    public static final String EMAIL_KEY = "email";
+
+    public static final String GOOGLE_TOKEN_ID_KEY = "tokenId";
 
     public static final String FORM_RECAPTCHA_KEY = "token";
 
@@ -41,8 +48,9 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final RecaptchaV3Service recaptchaV3Service;
 
-    public AuthenticationFilter(AuthenticationManager authenticationManager, JwtService jwtService, ObjectMapper objectMapper, ResetKeyService resetKeyService,
-                                RecaptchaV3Service recaptchaV3Service) {
+    public GoogleOpenIdAuthenticationFilter(AuthenticationManager authenticationManager, JwtService jwtService, ObjectMapper objectMapper,
+                                            ResetKeyService resetKeyService, RecaptchaV3Service recaptchaV3Service) {
+        super(new AntPathRequestMatcher("/public/authentication/login/google", "POST"));
         this.jwtService = jwtService;
         this.objectMapper = objectMapper;
         this.resetKeyService = resetKeyService;
@@ -53,17 +61,21 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         try {
-            this.recaptchaV3Service.validateToken(request.getParameter(FORM_RECAPTCHA_KEY), request.getParameter(SPRING_SECURITY_FORM_USERNAME_KEY),
-                                                  RecaptchaV3Action.LOGIN);
-            return super.attemptAuthentication(request, response);
+            this.recaptchaV3Service.validateToken(request.getParameter(FORM_RECAPTCHA_KEY), request.getParameter(EMAIL_KEY), RecaptchaV3Action.LOGIN);
+
+            String email = request.getParameter(EMAIL_KEY);
+            String tokenId = request.getParameter(GOOGLE_TOKEN_ID_KEY);
+
+            GoogleAuthenticationToken authRequest = new GoogleAuthenticationToken(email, tokenId);
+
+            return this.getAuthenticationManager().authenticate(authRequest);
         } catch (AccountStatusException e) {
             SecurityContextHolder.clearContext();
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
             try {
-                response.getWriter()
-                        .write(this.objectMapper.writeValueAsString(new ErrorObject<>(ErrorCode.ACCOUNT_NOT_ACTIVATED)));
+                response.getWriter().write(this.objectMapper.writeValueAsString(new ErrorObject<>(ErrorCode.ACCOUNT_NOT_ACTIVATED)));
                 response.flushBuffer();
             } catch (Exception e1) {
                 throw e;
@@ -76,8 +88,33 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
             try {
-                response.getWriter()
-                        .write(this.objectMapper.writeValueAsString(new ErrorObject<>(ErrorCode.INVALID_CREDENTIALS)));
+                response.getWriter().write(this.objectMapper.writeValueAsString(new ErrorObject<>(ErrorCode.INVALID_CREDENTIALS)));
+                response.flushBuffer();
+            } catch (Exception e1) {
+                throw e;
+            }
+
+            return null;
+        } catch (NoGoogleAccountException e) {
+            SecurityContextHolder.clearContext();
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+            try {
+                response.getWriter().write(this.objectMapper.writeValueAsString(new ErrorObject<>(ErrorCode.NO_GOOGLE_ACCOUNT)));
+                response.flushBuffer();
+            } catch (Exception e1) {
+                throw e;
+            }
+
+            return null;
+        } catch (NotGoogleAccountException e) {
+            SecurityContextHolder.clearContext();
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+            try {
+                response.getWriter().write(this.objectMapper.writeValueAsString(new ErrorObject<>(ErrorCode.NOT_GOOGLE_ACCOUNT)));
                 response.flushBuffer();
             } catch (Exception e1) {
                 throw e;

@@ -10,6 +10,8 @@ import com.example.demo.common.exception.ResetPasswordException;
 import com.example.demo.common.exception.UserAlreadyExistException;
 import com.example.demo.common.exception.UsernameTooLongException;
 import com.example.demo.common.exception.UsernameTooShortException;
+import com.example.demo.config.filter.GoogleUserDetails;
+import com.example.demo.config.filter.GoogleUserDetailsService;
 import com.example.demo.config.properties.DemoProperties;
 import com.example.demo.model.ActivationKey;
 import com.example.demo.model.ResetKey;
@@ -38,7 +40,7 @@ import java.util.Date;
 
 @Service
 @Transactional
-public class UserServiceImpl extends AbstractEntityServiceImpl<User, UserRepository> implements UserService, UserDetailsService {
+public class UserServiceImpl extends AbstractEntityServiceImpl<User, UserRepository> implements UserService, UserDetailsService, GoogleUserDetailsService {
 
     private static final String PASSWORD_REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[€@$!%*?&])[A-Za-z\\d€@$!%*?&]{8,}$";
 
@@ -233,9 +235,22 @@ public class UserServiceImpl extends AbstractEntityServiceImpl<User, UserReposit
             throw new UsernameNotFoundException("User '" + email + "' not found");
         }
 
-        email = email.toLowerCase();
+        User user = getByEmail(email);
 
-        User user = this.repository.getFirstByEmail(email);
+        if (user == null) {
+            throw new UsernameNotFoundException("User '" + email + "' not found");
+        }
+
+        return user;
+    }
+
+    @Override
+    public GoogleUserDetails loadGoogleUserByUsername(String email) throws UsernameNotFoundException {
+        if (StringUtils.isBlank(email)) {
+            throw new UsernameNotFoundException("User '" + email + "' not found");
+        }
+
+        User user = getByEmail(email);
 
         if (user == null) {
             throw new UsernameNotFoundException("User '" + email + "' not found");

@@ -1,4 +1,4 @@
-package com.example.demo.service.google;
+package com.example.demo.service.google.objects;
 
 public class RecaptchaV3VerificationBody {
 

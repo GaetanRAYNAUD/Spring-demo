@@ -1,4 +1,4 @@
-package com.example.demo.service.google;
+package com.example.demo.service.google.objects;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;

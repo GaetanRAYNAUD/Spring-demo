@@ -28,6 +28,9 @@ public class DemoProperties {
     @NestedConfigurationProperty
     private RecaptchaProperties recaptcha;
 
+    @NestedConfigurationProperty
+    private GoogleOpenIdProperties googleOpenId;
+
     public String getTitle() {
         return title;
     }
@@ -90,5 +93,13 @@ public class DemoProperties {
 
     public void setRecaptcha(RecaptchaProperties recaptcha) {
         this.recaptcha = recaptcha;
+    }
+
+    public GoogleOpenIdProperties getGoogleOpenId() {
+        return googleOpenId;
+    }
+
+    public void setGoogleOpenId(GoogleOpenIdProperties googleOpenId) {
+        this.googleOpenId = googleOpenId;
     }
 }

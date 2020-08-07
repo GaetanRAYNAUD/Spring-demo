@@ -1,5 +1,6 @@
 package com.example.demo.model;
 
+import com.example.demo.config.filter.GoogleUserDetails;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -22,7 +23,7 @@ import java.util.Set;
 @Entity
 @Table(name = "app_user", schema = "demo")
 @SequenceGenerator(name = "id_seq_generator", sequenceName = "app_user_id_seq", schema = "demo", allocationSize = 1)
-public class User extends AbstractEntity implements UserDetails {
+public class User extends AbstractEntity implements UserDetails, GoogleUserDetails {
 
     @Column(name = "username", unique = true, nullable = false, length = 24)
     private String username;
@@ -112,5 +113,10 @@ public class User extends AbstractEntity implements UserDetails {
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
+    }
+
+    @Override
+    public String getGoogleId() {
+        return null;
     }
 }

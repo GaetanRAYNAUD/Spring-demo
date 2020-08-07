@@ -3,6 +3,7 @@ package com.example.demo.service.google;
 import com.example.demo.common.Constants;
 import com.example.demo.common.exception.RecaptchaV3Exception;
 import com.example.demo.config.properties.DemoProperties;
+import com.example.demo.service.google.objects.RecaptchaV3VerificationResponseBody;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;

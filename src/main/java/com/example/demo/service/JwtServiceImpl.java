@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.common.Constants;
 import com.example.demo.config.properties.DemoProperties;
 import com.example.demo.model.User;
+import com.example.demo.service.google.GoogleOpenIdService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtParserBuilder;
@@ -33,6 +34,8 @@ public class JwtServiceImpl implements JwtService {
 
     protected final SessionService sessionService;
 
+    protected final GoogleOpenIdService googleOpenIdService;
+
     protected final JwtParserBuilder jwtParserBuilder;
 
     protected final DemoProperties demoProperties;
@@ -41,8 +44,10 @@ public class JwtServiceImpl implements JwtService {
 
     protected final SecretKey secretKey;
 
-    public JwtServiceImpl(SessionService sessionService, DemoProperties demoProperties) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public JwtServiceImpl(SessionService sessionService, GoogleOpenIdService googleOpenIdService,
+                          DemoProperties demoProperties) throws NoSuchAlgorithmException, InvalidKeySpecException {
         this.sessionService = sessionService;
+        this.googleOpenIdService = googleOpenIdService;
         this.demoProperties = demoProperties;
         this.jwtParserBuilder = new DefaultJwtParserBuilder();
         this.publicKey = KeyFactory.getInstance("RSA")
@@ -92,5 +97,10 @@ public class JwtServiceImpl implements JwtService {
                    .build()
                    .parseClaimsJws(bearerToken)
                    .getBody();
+    }
+
+    @Override
+    public Claims getGoogleClaims(String token) {
+        return this.googleOpenIdService.validateToken(token);
     }
 }

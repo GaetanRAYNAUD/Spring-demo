@@ -14,4 +14,6 @@ public interface JwtService {
     Pair<String, Date> generateToken(User user);
 
     Claims getClaims(String bearerToken);
+
+    Claims getGoogleClaims(String token);
 }
