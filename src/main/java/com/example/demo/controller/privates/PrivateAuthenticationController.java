@@ -18,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,11 +44,9 @@ public class PrivateAuthenticationController {
     @Operation(summary = "Refresh a token", description = "Refresh a token to extends it's lifetime",
                security = @SecurityRequirement(name = "Authorization"))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                         description = "Token refreshed",
+            @ApiResponse(responseCode = "200", description = "Token refreshed",
                          content = {@Content(schema = @Schema(implementation = TokenDTO.class))}),
-            @ApiResponse(responseCode = "500",
-                         description = "Internal error",
+            @ApiResponse(responseCode = "500", description = "Internal error",
                          content = {@Content(schema = @Schema(implementation = ErrorObject.class))})
     })
     public ResponseEntity<TokenDTO> refresh() {
@@ -62,8 +59,7 @@ public class PrivateAuthenticationController {
                description = "Simple request to know if the user is authenticated")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "User is authenticated"),
-            @ApiResponse(responseCode = "500",
-                         description = "Internal error",
+            @ApiResponse(responseCode = "500", description = "Internal error",
                          content = {@Content(schema = @Schema(implementation = ErrorObject.class))})
     })
     @ResponseStatus(HttpStatus.NO_CONTENT)

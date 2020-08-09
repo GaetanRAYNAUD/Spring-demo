@@ -3,7 +3,6 @@ package com.example.demo.service.google.objects;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.net.URI;
 import java.net.URL;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

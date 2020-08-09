@@ -6,14 +6,10 @@ import com.example.demo.service.JwtService;
 import io.jsonwebtoken.Claims;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +27,7 @@ public class GoogleAuthenticationProvider implements AuthenticationProvider {
     }
 
     @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+    public Authentication authenticate(Authentication authentication) {
         if (!authentication.getCredentials().getClass().equals(String.class)) {
             return authentication;
         }
@@ -60,7 +56,7 @@ public class GoogleAuthenticationProvider implements AuthenticationProvider {
             throw new BadCredentialsException("Token and user don't have same google id");
         }
 
-        return new GoogleAuthenticationToken(username, "", user.getAuthorities());
+        return new GoogleAuthenticationToken(user, "", user.getAuthorities());
     }
 
     @Override
@@ -68,7 +64,7 @@ public class GoogleAuthenticationProvider implements AuthenticationProvider {
         return (GoogleAuthenticationToken.class.isAssignableFrom(authentication));
     }
 
-    protected final GoogleUserDetails retrieveUser(String username) throws AuthenticationException {
+    protected final GoogleUserDetails retrieveUser(String username) {
         try {
             GoogleUserDetails loadedUser = this.getGoogleUserDetailsService().loadGoogleUserByUsername(username);
 

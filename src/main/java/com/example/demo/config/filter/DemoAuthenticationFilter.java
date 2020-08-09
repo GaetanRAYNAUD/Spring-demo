@@ -18,12 +18,10 @@ import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -41,7 +39,8 @@ public class DemoAuthenticationFilter extends UsernamePasswordAuthenticationFilt
 
     private final RecaptchaV3Service recaptchaV3Service;
 
-    public DemoAuthenticationFilter(AuthenticationManager authenticationManager, JwtService jwtService, ObjectMapper objectMapper, ResetKeyService resetKeyService,
+    public DemoAuthenticationFilter(AuthenticationManager authenticationManager, JwtService jwtService, ObjectMapper objectMapper,
+                                    ResetKeyService resetKeyService,
                                     RecaptchaV3Service recaptchaV3Service) {
         this.jwtService = jwtService;
         this.objectMapper = objectMapper;
@@ -51,7 +50,7 @@ public class DemoAuthenticationFilter extends UsernamePasswordAuthenticationFilt
     }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
         try {
             this.recaptchaV3Service.validateToken(request.getParameter(FORM_RECAPTCHA_KEY), request.getParameter(SPRING_SECURITY_FORM_USERNAME_KEY),
                                                   RecaptchaV3Action.LOGIN);
@@ -87,7 +86,7 @@ public class DemoAuthenticationFilter extends UsernamePasswordAuthenticationFilt
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
-                                            Authentication auth) throws IOException, ServletException {
+                                            Authentication auth) throws IOException {
         User user = (User) auth.getPrincipal();
         this.resetKeyService.deleteByUser(user);
 

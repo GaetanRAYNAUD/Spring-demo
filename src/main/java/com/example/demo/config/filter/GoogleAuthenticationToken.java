@@ -4,7 +4,6 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.SpringSecurityCoreVersion;
 
-import java.io.Serializable;
 import java.util.Collection;
 
 public class GoogleAuthenticationToken extends AbstractAuthenticationToken {

@@ -21,4 +21,6 @@ public interface UserService extends AbstractEntityService<User> {
     User getByUsername(String username);
 
     void askResetPassword(String email, String token) throws MessagingException;
+
+    User registerGoogle(String username, String tokenId, String token);
 }

@@ -1,9 +1,11 @@
 package com.example.demo.model;
 
 import com.example.demo.config.filter.GoogleUserDetails;
+import org.hibernate.annotations.Where;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -12,12 +14,12 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -37,7 +39,7 @@ public class User extends AbstractEntity implements UserDetails, GoogleUserDetai
     @Column(name = "enabled", nullable = false)
     private boolean enabled = false;
 
-    @Column(name = "password_reset_date",  nullable = false)
+    @Column(name = "password_reset_date")
     private Timestamp passwordResetDate;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -45,6 +47,9 @@ public class User extends AbstractEntity implements UserDetails, GoogleUserDetai
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private Set<Role> roles;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    public SocialUser googleUser;
 
     public String getUsername() {
         return username;
@@ -95,6 +100,14 @@ public class User extends AbstractEntity implements UserDetails, GoogleUserDetai
         this.roles = roles;
     }
 
+    public SocialUser getGoogleUser() {
+        return googleUser;
+    }
+
+    public void setGoogleUser(SocialUser googleUser) {
+        this.googleUser = googleUser;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return getRoles();
@@ -117,6 +130,10 @@ public class User extends AbstractEntity implements UserDetails, GoogleUserDetai
 
     @Override
     public String getGoogleId() {
-        return null;
+        if (this.googleUser == null) {
+            return null;
+        }
+
+        return this.googleUser.getSocialId();
     }
 }

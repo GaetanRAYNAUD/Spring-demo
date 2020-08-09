@@ -20,13 +20,11 @@ import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -59,7 +57,7 @@ public class GoogleOpenIdAuthenticationFilter extends AbstractAuthenticationProc
     }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
         try {
             this.recaptchaV3Service.validateToken(request.getParameter(FORM_RECAPTCHA_KEY), request.getParameter(EMAIL_KEY), RecaptchaV3Action.LOGIN);
 
@@ -126,14 +124,12 @@ public class GoogleOpenIdAuthenticationFilter extends AbstractAuthenticationProc
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
-                                            Authentication auth) throws IOException, ServletException {
+                                            Authentication auth) throws IOException {
         User user = (User) auth.getPrincipal();
-        this.resetKeyService.deleteByUser(user);
 
         Pair<String, Date> token = this.jwtService.generateToken(user);
         response.addHeader(HttpHeaders.AUTHORIZATION, Constants.BEARER + " " + token);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter()
-                .write(this.objectMapper.writeValueAsString(new TokenDTO(token.getKey(), token.getValue())));
+        response.getWriter().write(this.objectMapper.writeValueAsString(new TokenDTO(token.getKey(), token.getValue())));
     }
 }
