@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+  <changeSet id="create_social_user_table" author="graynaud">
+    <createTable tableName="social_user" schemaName="demo">
+      <column name="id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false" unique="true"/>
+      </column>
+
+      <column name="user_id" type="bigint">
+        <constraints nullable="false" foreignKeyName="fk_social_user_app_user_id" references="demo.app_user(id)"
+                     unique="true"/>
+      </column>
+
+      <column name="social_id" type="varchar(128)">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="source" type="varchar(16)">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="creation_date" type="timestamp">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="creation_user" type="varchar(25)">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="modification_date" type="timestamp">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="modification_user" type="varchar(25)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <createIndex indexName="idx_social_user_user_id" tableName="social_user" schemaName="demo">
+      <column name="user_id"/>
+    </createIndex>
+
+    <createIndex indexName="idx_social_user_social_id" tableName="social_user" schemaName="demo">
+      <column name="social_id"/>
+    </createIndex>
+
+    <createIndex indexName="idx_social_user_source" tableName="social_user" schemaName="demo">
+      <column name="source"/>
+    </createIndex>
+
+    <dropNotNullConstraint tableName="app_user" columnName="password_reset_date" schemaName="demo"/>
+  </changeSet>
+</databaseChangeLog>

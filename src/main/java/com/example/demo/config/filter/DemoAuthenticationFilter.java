@@ -18,18 +18,16 @@ import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Date;
 
-public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+public class DemoAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     public static final String FORM_RECAPTCHA_KEY = "token";
 
@@ -41,8 +39,9 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final RecaptchaV3Service recaptchaV3Service;
 
-    public AuthenticationFilter(AuthenticationManager authenticationManager, JwtService jwtService, ObjectMapper objectMapper, ResetKeyService resetKeyService,
-                                RecaptchaV3Service recaptchaV3Service) {
+    public DemoAuthenticationFilter(AuthenticationManager authenticationManager, JwtService jwtService, ObjectMapper objectMapper,
+                                    ResetKeyService resetKeyService,
+                                    RecaptchaV3Service recaptchaV3Service) {
         this.jwtService = jwtService;
         this.objectMapper = objectMapper;
         this.resetKeyService = resetKeyService;
@@ -51,7 +50,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
         try {
             this.recaptchaV3Service.validateToken(request.getParameter(FORM_RECAPTCHA_KEY), request.getParameter(SPRING_SECURITY_FORM_USERNAME_KEY),
                                                   RecaptchaV3Action.LOGIN);
@@ -62,8 +61,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
             try {
-                response.getWriter()
-                        .write(this.objectMapper.writeValueAsString(new ErrorObject<>(ErrorCode.ACCOUNT_NOT_ACTIVATED)));
+                response.getWriter().write(this.objectMapper.writeValueAsString(new ErrorObject<>(ErrorCode.ACCOUNT_NOT_ACTIVATED)));
                 response.flushBuffer();
             } catch (Exception e1) {
                 throw e;
@@ -76,8 +74,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
             try {
-                response.getWriter()
-                        .write(this.objectMapper.writeValueAsString(new ErrorObject<>(ErrorCode.INVALID_CREDENTIALS)));
+                response.getWriter().write(this.objectMapper.writeValueAsString(new ErrorObject<>(ErrorCode.INVALID_CREDENTIALS)));
                 response.flushBuffer();
             } catch (Exception e1) {
                 throw e;
@@ -89,14 +86,13 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
-                                            Authentication auth) throws IOException, ServletException {
+                                            Authentication auth) throws IOException {
         User user = (User) auth.getPrincipal();
         this.resetKeyService.deleteByUser(user);
 
         Pair<String, Date> token = this.jwtService.generateToken(user);
         response.addHeader(HttpHeaders.AUTHORIZATION, Constants.BEARER + " " + token);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter()
-                .write(this.objectMapper.writeValueAsString(new TokenDTO(token.getKey(), token.getValue())));
+        response.getWriter().write(this.objectMapper.writeValueAsString(new TokenDTO(token.getKey(), token.getValue())));
     }
 }

@@ -10,18 +10,24 @@ import com.example.demo.common.exception.ResetPasswordException;
 import com.example.demo.common.exception.UserAlreadyExistException;
 import com.example.demo.common.exception.UsernameTooLongException;
 import com.example.demo.common.exception.UsernameTooShortException;
+import com.example.demo.config.filter.GoogleUserDetails;
+import com.example.demo.config.filter.GoogleUserDetailsService;
 import com.example.demo.config.properties.DemoProperties;
 import com.example.demo.model.ActivationKey;
 import com.example.demo.model.ResetKey;
 import com.example.demo.model.Role;
+import com.example.demo.model.SocialSource;
+import com.example.demo.model.SocialUser;
 import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.MailService;
 import com.example.demo.service.definition.ActivationKeyService;
 import com.example.demo.service.definition.ResetKeyService;
 import com.example.demo.service.definition.UserService;
+import com.example.demo.service.google.GoogleOpenIdService;
 import com.example.demo.service.google.RecaptchaV3Action;
 import com.example.demo.service.google.RecaptchaV3Service;
+import io.jsonwebtoken.Claims;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.context.annotation.Lazy;
@@ -38,7 +44,7 @@ import java.util.Date;
 
 @Service
 @Transactional
-public class UserServiceImpl extends AbstractEntityServiceImpl<User, UserRepository> implements UserService, UserDetailsService {
+public class UserServiceImpl extends AbstractEntityServiceImpl<User, UserRepository> implements UserService, UserDetailsService, GoogleUserDetailsService {
 
     private static final String PASSWORD_REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[€@$!%*?&])[A-Za-z\\d€@$!%*?&]{8,}$";
 
@@ -56,9 +62,11 @@ public class UserServiceImpl extends AbstractEntityServiceImpl<User, UserReposit
 
     private final RecaptchaV3Service recaptchaV3Service;
 
+    private final GoogleOpenIdService googleOpenIdService;
+
     public UserServiceImpl(UserRepository repository, DemoProperties demoProperties, @Lazy PasswordEncoder passwordEncoder,
                            ActivationKeyService activationKeyService, ResetKeyService resetKeyService, MailService mailService,
-                           RecaptchaV3Service recaptchaV3Service) {
+                           RecaptchaV3Service recaptchaV3Service, GoogleOpenIdService googleOpenIdService) {
         super(repository);
         this.demoProperties = demoProperties;
         this.passwordEncoder = passwordEncoder;
@@ -66,6 +74,7 @@ public class UserServiceImpl extends AbstractEntityServiceImpl<User, UserReposit
         this.resetKeyService = resetKeyService;
         this.mailService = mailService;
         this.recaptchaV3Service = recaptchaV3Service;
+        this.googleOpenIdService = googleOpenIdService;
     }
 
     @Override
@@ -111,6 +120,47 @@ public class UserServiceImpl extends AbstractEntityServiceImpl<User, UserReposit
 
         user = create(user);
         sendActivationMail(user);
+
+        return user;
+    }
+
+    @Override
+    public User registerGoogle(String username, String tokenId, String token) {
+        if (username.length() < 8) {
+            throw new UsernameTooShortException();
+        }
+
+        if (username.length() > 24) {
+            throw new UsernameTooLongException();
+        }
+
+        this.recaptchaV3Service.validateToken(token, username, RecaptchaV3Action.REGISTRATION);
+
+        Claims claims = this.googleOpenIdService.validateToken(tokenId);
+        String email = claims.get("email", String.class);
+
+        if (!email.matches(EMAIL_REGEX)) {
+            throw new EmailNotMatchRegexException("Email " + email + " doesn't match regex");
+        }
+
+        User user = getByEmail(email);
+
+        if (user != null) {
+            throw new EmailAlreadyExistException("Email " + email + " already exists !");
+        }
+
+        if (getByUsername(username) != null) {
+            throw new UserAlreadyExistException("Username " + username + " already exists !");
+        }
+
+        user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setEnabled(true);
+        user.setRoles(Collections.singleton(Role.ROLE_USER));
+        user.setGoogleUser(new SocialUser(claims.getSubject(), SocialSource.GOOGLE, user));
+
+        user = create(user);
 
         return user;
     }
@@ -233,9 +283,22 @@ public class UserServiceImpl extends AbstractEntityServiceImpl<User, UserReposit
             throw new UsernameNotFoundException("User '" + email + "' not found");
         }
 
-        email = email.toLowerCase();
+        User user = getByEmail(email);
 
-        User user = this.repository.getFirstByEmail(email);
+        if (user == null) {
+            throw new UsernameNotFoundException("User '" + email + "' not found");
+        }
+
+        return user;
+    }
+
+    @Override
+    public GoogleUserDetails loadGoogleUserByUsername(String email) throws UsernameNotFoundException {
+        if (StringUtils.isBlank(email)) {
+            throw new UsernameNotFoundException("User '" + email + "' not found");
+        }
+
+        User user = getByEmail(email);
 
         if (user == null) {
             throw new UsernameNotFoundException("User '" + email + "' not found");

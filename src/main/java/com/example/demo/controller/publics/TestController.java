@@ -1,7 +1,7 @@
 package com.example.demo.controller.publics;
 
-import com.example.demo.controller.object.ErrorObject;
 import com.example.demo.controller.dto.TestBodyDTO;
+import com.example.demo.controller.object.ErrorObject;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

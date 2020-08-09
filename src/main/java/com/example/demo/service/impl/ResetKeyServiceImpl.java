@@ -1,17 +1,14 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.common.RandomUtils;
-import com.example.demo.model.ActivationKey;
 import com.example.demo.model.ResetKey;
 import com.example.demo.model.User;
 import com.example.demo.repository.ResetKeyRepository;
 import com.example.demo.service.definition.ResetKeyService;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.SecureRandom;
 import java.util.Date;
 
 @Service

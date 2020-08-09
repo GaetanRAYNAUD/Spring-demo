@@ -39,7 +39,7 @@ public class SessionServiceImpl implements SessionService {
     public void authenticateFromToken(Claims claims) {
         User user = (User) this.userService.loadUserByUsername(claims.getSubject());
 
-        if (user.getPasswordResetDate().after(claims.getIssuedAt())) {
+        if (user.getGoogleUser() == null && user.getPasswordResetDate().after(claims.getIssuedAt())) {
             throw new ExpiredJwtException(null, claims,
                                           "Someone tried to use a jwt token issued before last password change for: "
                                           + claims.getSubject());
