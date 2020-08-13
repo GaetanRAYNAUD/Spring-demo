@@ -2,10 +2,12 @@ package com.example.demo.controller;
 
 import com.example.demo.common.exception.EmailAlreadyExistException;
 import com.example.demo.common.exception.EmailNotMatchRegexException;
+import com.example.demo.common.exception.InvalidPasswordException;
 import com.example.demo.common.exception.KeyExpiredException;
 import com.example.demo.common.exception.KeyNotFoundException;
 import com.example.demo.common.exception.NoGoogleAccountException;
 import com.example.demo.common.exception.NotGoogleAccountException;
+import com.example.demo.common.exception.NotPasswordAccountException;
 import com.example.demo.common.exception.PasswordsNotMatchException;
 import com.example.demo.common.exception.PasswordsNotMatchRegexException;
 import com.example.demo.common.exception.RecaptchaV3Exception;
@@ -189,5 +191,15 @@ public class ExceptionTranslator {
     @ExceptionHandler
     public ResponseEntity<ErrorObject<Void>> handleNotGoogleAccountException(NotGoogleAccountException e) {
         return new ResponseEntity<>(new ErrorObject<>(ErrorCode.NOT_GOOGLE_ACCOUNT), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorObject<Void>> handleNotPasswordAccountException(NotPasswordAccountException e) {
+        return new ResponseEntity<>(new ErrorObject<>(ErrorCode.NOT_PASSWORD_ACCOUNT), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorObject<Void>> handleChangePasswordException(InvalidPasswordException e) {
+        return new ResponseEntity<>(new ErrorObject<>(ErrorCode.INVALID_PASSWORD), HttpStatus.FORBIDDEN);
     }
 }

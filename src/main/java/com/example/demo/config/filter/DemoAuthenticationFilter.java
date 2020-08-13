@@ -5,6 +5,7 @@ import com.example.demo.common.exception.RecaptchaV3Exception;
 import com.example.demo.controller.dto.TokenDTO;
 import com.example.demo.controller.object.ErrorCode;
 import com.example.demo.controller.object.ErrorObject;
+import com.example.demo.model.AuthMethod;
 import com.example.demo.model.User;
 import com.example.demo.service.JwtService;
 import com.example.demo.service.definition.ResetKeyService;
@@ -93,6 +94,6 @@ public class DemoAuthenticationFilter extends UsernamePasswordAuthenticationFilt
         Pair<String, Date> token = this.jwtService.generateToken(user);
         response.addHeader(HttpHeaders.AUTHORIZATION, Constants.BEARER + " " + token);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write(this.objectMapper.writeValueAsString(new TokenDTO(token.getKey(), token.getValue())));
+        response.getWriter().write(this.objectMapper.writeValueAsString(new TokenDTO(token.getKey(), token.getValue(), AuthMethod.PASSWORD)));
     }
 }
