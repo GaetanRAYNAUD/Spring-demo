@@ -1,7 +1,6 @@
 package com.example.demo.model;
 
 import com.example.demo.config.filter.GoogleUserDetails;
-import org.hibernate.annotations.Where;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -106,6 +105,10 @@ public class User extends AbstractEntity implements UserDetails, GoogleUserDetai
 
     public void setGoogleUser(SocialUser googleUser) {
         this.googleUser = googleUser;
+    }
+
+    public AuthMethod getAuthMethod() {
+        return this.googleUser != null ? AuthMethod.GOOGLE : AuthMethod.PASSWORD;
     }
 
     @Override

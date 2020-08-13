@@ -16,6 +16,8 @@ public interface UserService extends AbstractEntityService<User> {
 
     void resetPassword(String key, String password, String passwordConfirmation, String token);
 
+    void changePassword(String currentPassword, String newPassword, String passwordConfirmation);
+
     User getByEmail(String email);
 
     User getByUsername(String username);

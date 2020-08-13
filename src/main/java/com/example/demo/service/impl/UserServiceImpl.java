@@ -2,8 +2,10 @@ package com.example.demo.service.impl;
 
 import com.example.demo.common.exception.EmailAlreadyExistException;
 import com.example.demo.common.exception.EmailNotMatchRegexException;
+import com.example.demo.common.exception.InvalidPasswordException;
 import com.example.demo.common.exception.KeyExpiredException;
 import com.example.demo.common.exception.KeyNotFoundException;
+import com.example.demo.common.exception.NotPasswordAccountException;
 import com.example.demo.common.exception.PasswordsNotMatchException;
 import com.example.demo.common.exception.PasswordsNotMatchRegexException;
 import com.example.demo.common.exception.ResetPasswordException;
@@ -14,6 +16,7 @@ import com.example.demo.config.filter.GoogleUserDetails;
 import com.example.demo.config.filter.GoogleUserDetailsService;
 import com.example.demo.config.properties.DemoProperties;
 import com.example.demo.model.ActivationKey;
+import com.example.demo.model.AuthMethod;
 import com.example.demo.model.ResetKey;
 import com.example.demo.model.Role;
 import com.example.demo.model.SocialSource;
@@ -21,6 +24,7 @@ import com.example.demo.model.SocialUser;
 import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.MailService;
+import com.example.demo.service.SessionService;
 import com.example.demo.service.definition.ActivationKeyService;
 import com.example.demo.service.definition.ResetKeyService;
 import com.example.demo.service.definition.UserService;
@@ -64,9 +68,11 @@ public class UserServiceImpl extends AbstractEntityServiceImpl<User, UserReposit
 
     private final GoogleOpenIdService googleOpenIdService;
 
+    private final SessionService sessionService;
+
     public UserServiceImpl(UserRepository repository, DemoProperties demoProperties, @Lazy PasswordEncoder passwordEncoder,
                            ActivationKeyService activationKeyService, ResetKeyService resetKeyService, MailService mailService,
-                           RecaptchaV3Service recaptchaV3Service, GoogleOpenIdService googleOpenIdService) {
+                           RecaptchaV3Service recaptchaV3Service, GoogleOpenIdService googleOpenIdService, @Lazy SessionService sessionService) {
         super(repository);
         this.demoProperties = demoProperties;
         this.passwordEncoder = passwordEncoder;
@@ -75,6 +81,7 @@ public class UserServiceImpl extends AbstractEntityServiceImpl<User, UserReposit
         this.mailService = mailService;
         this.recaptchaV3Service = recaptchaV3Service;
         this.googleOpenIdService = googleOpenIdService;
+        this.sessionService = sessionService;
     }
 
     @Override
@@ -265,6 +272,31 @@ public class UserServiceImpl extends AbstractEntityServiceImpl<User, UserReposit
         update(user);
 
         this.resetKeyService.delete(resetKey);
+    }
+
+    @Override
+    public void changePassword(String currentPassword, String newPassword, String passwordConfirmation) {
+        if (!newPassword.equals(passwordConfirmation)) {
+            throw new PasswordsNotMatchException();
+        }
+
+        if (!newPassword.matches(PASSWORD_REGEX)) {
+            throw new PasswordsNotMatchRegexException();
+        }
+
+        User user = this.sessionService.getCurrentUser();
+
+        if (!AuthMethod.PASSWORD.equals(user.getAuthMethod())) {
+            throw new NotPasswordAccountException(user.getUsername() + " tried to change his password but is not a password user !");
+        }
+
+        if (!this.passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new InvalidPasswordException("");
+        }
+
+        user.setPassword(this.passwordEncoder.encode(newPassword));
+        user.setPasswordResetDate(new Date());
+        update(user);
     }
 
     @Override

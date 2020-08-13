@@ -9,6 +9,7 @@ import com.example.demo.controller.dto.TokenDTO;
 import com.example.demo.controller.dto.UserActivationDTO;
 import com.example.demo.controller.dto.UserRegistrationDTO;
 import com.example.demo.controller.object.ErrorObject;
+import com.example.demo.model.AuthMethod;
 import com.example.demo.model.User;
 import com.example.demo.service.JwtService;
 import com.example.demo.service.definition.UserService;
@@ -86,7 +87,7 @@ public class AuthenticationController {
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.AUTHORIZATION, Constants.BEARER + " " + token);
 
-        return ResponseEntity.ok().headers(headers).body(new TokenDTO(token.getKey(), token.getValue()));
+        return ResponseEntity.ok().headers(headers).body(new TokenDTO(token.getKey(), token.getValue(), AuthMethod.GOOGLE));
     }
 
     @PostMapping(value = "/activate", consumes = MediaType.APPLICATION_JSON_VALUE,
